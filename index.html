@@ -22,9 +22,12 @@
     <div id="chat" style="display:none;">
         <h2>Sohbet Odası</h2>
         <div id="chatBox"></div>
+        
         <input id="msg" placeholder="Mesajını yaz...">
         <button onclick="mesajGonder()">Gönder</button>
-        <button onclick="location.reload()">Çıkış</button>
+        
+        <br><br>
+        <button onclick="location.reload()">Çıkış Yap</button>
     </div>
 
     <script type="module">
@@ -45,7 +48,8 @@
         const auth = getAuth(app);
         const db = getFirestore(app);
 
-        window.kayitOl = () => createUserWithEmailAndPassword(auth, document.getElementById("email").value, document.getElementById("pass").value).then(() => alert("Kayıt tamam!")).catch(e => alert(e.message));
+        window.kayitOl = () => createUserWithEmailAndPassword(auth, document.getElementById("email").value, document.getElementById("pass").value)
+            .then(() => alert("Kayıt tamam!")).catch(e => alert(e.message));
 
         window.girisYap = () => {
             signInWithEmailAndPassword(auth, document.getElementById("email").value, document.getElementById("pass").value)
@@ -59,8 +63,10 @@
 
         window.mesajGonder = () => {
             const metin = document.getElementById("msg").value;
-            addDoc(collection(db, "mesajlar"), { metin: metin, zaman: Date.now() });
-            document.getElementById("msg").value = "";
+            if(metin.trim() !== "") {
+                addDoc(collection(db, "mesajlar"), { metin: metin, zaman: Date.now() });
+                document.getElementById("msg").value = "";
+            }
         };
 
         function mesajlariGetir() {
