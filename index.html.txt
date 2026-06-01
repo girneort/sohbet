@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Sohbetim</title>
+</head>
+<body>
+
+    <div id="login">
+        <h2>Giriş Yap</h2>
+        <input id="email" placeholder="E-posta">
+        <input type="password" id="pass" placeholder="Şifre">
+        <button onclick="kayitOl()">Kaydol</button>
+        <button onclick="girisYap()">Giriş Yap</button>
+    </div>
+
+    <div id="chat" style="display:none;">
+        <h2>Sohbet Odası</h2>
+        <button onclick="location.reload()">Çıkış</button>
+    </div>
+
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+
+        // Kendi Firebase anahtarların
+        const firebaseConfig = {
+            apiKey: "AIzaSyAeIwGfi_IQuiqzFyv6FvmgmdRocEDT_BI",
+            authDomain: "okul-sohbet-45e51.firebaseapp.com",
+            projectId: "okul-sohbet-45e51",
+            storageBucket: "okul-sohbet-45e51.firebasestorage.app",
+            messagingSenderId: "143291075618",
+            appId: "1:143291075618:web:6ac0eb7f8e05dab8fd8e7b"
+        };
+
+        const auth = getAuth(initializeApp(firebaseConfig));
+
+        // Kayıt Fonksiyonu
+        window.kayitOl = () => {
+            createUserWithEmailAndPassword(auth, document.getElementById("email").value, document.getElementById("pass").value)
+                .then(() => alert("Kayıt tamam! Şimdi giriş yap."))
+                .catch(e => alert(e.message));
+        };
+
+        // Giriş Fonksiyonu
+        window.girisYap = () => {
+            signInWithEmailAndPassword(auth, document.getElementById("email").value, document.getElementById("pass").value)
+                .then(() => {
+                    document.getElementById("login").style.display = "none";
+                    document.getElementById("chat").style.display = "block";
+                })
+                .catch(e => alert("Hata: " + e.message));
+        };
+    </script>
+</body>
+</html>
