@@ -1,83 +1,204 @@
+```html
 <!DOCTYPE html>
 <html lang="tr">
 <head>
-    <meta charset="UTF-8">
-    <title>Sohbetim</title>
-    <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; }
-        input { display: block; margin: 10px auto; padding: 10px; width: 250px; }
-        #chatBox { border: 1px solid #ccc; height: 300px; overflow-y: scroll; margin: 10px auto; width: 300px; text-align: left; padding: 10px; }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sohbetim</title>
+
+<style>
+body{
+    font-family:Arial,sans-serif;
+    background:#18191c;
+    color:white;
+    text-align:center;
+    padding:20px;
+}
+
+#login,#chat{
+    max-width:600px;
+    margin:auto;
+}
+
+input{
+    display:block;
+    margin:10px auto;
+    padding:12px;
+    width:300px;
+    border:none;
+    border-radius:8px;
+    outline:none;
+}
+
+button{
+    padding:10px 15px;
+    border:none;
+    border-radius:8px;
+    cursor:pointer;
+    background:#5865F2;
+    color:white;
+    margin:5px;
+}
+
+#chatBox{
+    background:white;
+    color:black;
+    border:none;
+    height:400px;
+    overflow-y:auto;
+    margin:10px auto;
+    width:100%;
+    text-align:left;
+    padding:10px;
+    border-radius:10px;
+}
+
+.message{
+    background:#f1f1f1;
+    padding:8px;
+    margin:5px 0;
+    border-radius:8px;
+}
+
+.chatArea{
+    display:flex;
+    gap:10px;
+    justify-content:center;
+    margin-top:10px;
+}
+
+.chatArea input{
+    flex:1;
+    margin:0;
+    width:auto;
+}
+
+.chatArea button{
+    margin:0;
+}
+</style>
 </head>
 <body>
 
-    <div id="login">
-        <h2>Giriş Yap</h2>
-        <input type="email" id="email" placeholder="E-posta">
-        <input type="password" id="pass" placeholder="Şifre">
-        <button onclick="kayitOl()">Kaydol</button>
-        <button onclick="girisYap()">Giriş Yap</button>
-    </div>
+<div id="login">
+    <h2>Giriş Yap</h2>
 
-    <div id="chat" style="display:none;">
-        <h2>Sohbet Odası</h2>
-        <div id="chatBox"></div>
-        
+    <input type="text" id="username" placeholder="Kullanıcı Adı">
+    <input type="email" id="email" placeholder="E-posta">
+    <input type="password" id="pass" placeholder="Şifre">
+
+    <button onclick="kayitOl()">Kaydol</button>
+    <button onclick="girisYap()">Giriş Yap</button>
+</div>
+
+<div id="chat" style="display:none;">
+    <h2>Sohbet Odası</h2>
+
+    <div id="chatBox"></div>
+
+    <div class="chatArea">
         <input id="msg" placeholder="Mesajını yaz...">
         <button onclick="mesajGonder()">Gönder</button>
-        
-        <br><br>
-        <button onclick="location.reload()">Çıkış Yap</button>
     </div>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
-        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
-        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
+    <br>
+    <button onclick="location.reload()">Çıkış Yap</button>
+</div>
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyAeIwGfi_IQuiqzFyv6FvmgmdRocEDT_BI",
-            authDomain: "okul-sohbet-45e51.firebaseapp.com",
-            projectId: "okul-sohbet-45e51",
-            storageBucket: "okul-sohbet-45e51.firebasestorage.app",
-            messagingSenderId: "143291075618",
-            appId: "1:143291075618:web:6ac0eb7f8e05dab8fd8e7b"
-        };
+<script type="module">
+import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
+import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
-        const app = initializeApp(firebaseConfig);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+const firebaseConfig = {
+    apiKey: "AIzaSyAeIwGfi_IQuiqzFyv6FvmgmdRocEDT_BI",
+    authDomain: "okul-sohbet-45e51.firebaseapp.com",
+    projectId: "okul-sohbet-45e51",
+    storageBucket: "okul-sohbet-45e51.firebasestorage.app",
+    messagingSenderId: "143291075618",
+    appId: "1:143291075618:web:6ac0eb7f8e05dab8fd8e7b"
+};
 
-        window.kayitOl = () => createUserWithEmailAndPassword(auth, document.getElementById("email").value, document.getElementById("pass").value)
-            .then(() => alert("Kayıt tamam!")).catch(e => alert(e.message));
+const app = initializeApp(firebaseConfig);
+const auth = getAuth(app);
+const db = getFirestore(app);
 
-        window.girisYap = () => {
-            signInWithEmailAndPassword(auth, document.getElementById("email").value, document.getElementById("pass").value)
-                .then(() => {
-                    document.getElementById("login").style.display = "none";
-                    document.getElementById("chat").style.display = "block";
-                    mesajlariGetir();
-                })
-                .catch(e => alert(e.message));
-        };
+window.kayitOl = () => {
+    createUserWithEmailAndPassword(
+        auth,
+        document.getElementById("email").value,
+        document.getElementById("pass").value
+    )
+    .then(() => alert("Kayıt tamam!"))
+    .catch(e => alert(e.message));
+};
 
-        window.mesajGonder = () => {
-            const metin = document.getElementById("msg").value;
-            if(metin.trim() !== "") {
-                addDoc(collection(db, "mesajlar"), { metin: metin, zaman: Date.now() });
-                document.getElementById("msg").value = "";
-            }
-        };
+window.girisYap = () => {
+    signInWithEmailAndPassword(
+        auth,
+        document.getElementById("email").value,
+        document.getElementById("pass").value
+    )
+    .then(() => {
+        document.getElementById("login").style.display = "none";
+        document.getElementById("chat").style.display = "block";
+        mesajlariGetir();
+    })
+    .catch(e => alert(e.message));
+};
 
-        function mesajlariGetir() {
-            onSnapshot(query(collection(db, "mesajlar"), orderBy("zaman")), (snapshot) => {
-                const chatBox = document.getElementById("chatBox");
-                chatBox.innerHTML = "";
-                snapshot.forEach(doc => {
-                    chatBox.innerHTML += `<p>${doc.data().metin}</p>`;
-                });
+window.mesajGonder = () => {
+    const metin = document.getElementById("msg").value.trim();
+
+    if(metin !== "") {
+
+        const kullanici =
+            document.getElementById("username").value ||
+            auth.currentUser.email.split("@")[0];
+
+        addDoc(collection(db, "mesajlar"), {
+            kullanici: kullanici,
+            metin: metin,
+            zaman: Date.now()
+        });
+
+        document.getElementById("msg").value = "";
+    }
+};
+
+function mesajlariGetir() {
+
+    onSnapshot(
+        query(collection(db, "mesajlar"), orderBy("zaman")),
+        (snapshot) => {
+
+            const chatBox = document.getElementById("chatBox");
+            chatBox.innerHTML = "";
+
+            snapshot.forEach(doc => {
+
+                const data = doc.data();
+
+                chatBox.innerHTML += `
+                    <div class="message">
+                        <b>${data.kullanici || "Kullanıcı"}:</b>
+                        ${data.metin}
+                    </div>
+                `;
             });
+
+            chatBox.scrollTop = chatBox.scrollHeight;
         }
-    </script>
+    );
+}
+
+document.getElementById("msg").addEventListener("keypress", function(e){
+    if(e.key === "Enter"){
+        mesajGonder();
+    }
+});
+</script>
+
 </body>
 </html>
+```
