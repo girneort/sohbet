@@ -4,8 +4,9 @@
     <meta charset="UTF-8">
     <title>Sohbetim</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 50px; }
+        body { font-family: sans-serif; text-align: center; padding: 20px; }
         input { display: block; margin: 10px auto; padding: 10px; width: 250px; }
+        #chatBox { border: 1px solid #ccc; height: 300px; overflow-y: scroll; margin: 10px auto; width: 300px; text-align: left; padding: 10px; }
     </style>
 </head>
 <body>
@@ -20,12 +21,16 @@
 
     <div id="chat" style="display:none;">
         <h2>Sohbet Odası</h2>
-        <button onclick="location.reload()">Çıkış Yap</button>
+        <div id="chatBox"></div>
+        <input id="msg" placeholder="Mesajını yaz...">
+        <button onclick="mesajGonder()">Gönder</button>
+        <button onclick="location.reload()">Çıkış</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
+        import { getFirestore, collection, addDoc, onSnapshot, query, orderBy } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore.js";
 
         const firebaseConfig = {
             apiKey: "AIzaSyAeIwGfi_IQuiqzFyv6FvmgmdRocEDT_BI",
@@ -36,26 +41,37 @@
             appId: "1:143291075618:web:6ac0eb7f8e05dab8fd8e7b"
         };
 
-        const auth = getAuth(initializeApp(firebaseConfig));
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        window.kayitOl = () => {
-            const e = document.getElementById("email").value;
-            const p = document.getElementById("pass").value;
-            createUserWithEmailAndPassword(auth, e, p)
-                .then(() => alert("Kayıt tamam! Şimdi giriş yapabilirsin."))
-                .catch(err => alert("Hata: " + err.message));
-        };
+        window.kayitOl = () => createUserWithEmailAndPassword(auth, document.getElementById("email").value, document.getElementById("pass").value).then(() => alert("Kayıt tamam!")).catch(e => alert(e.message));
 
         window.girisYap = () => {
-            const e = document.getElementById("email").value;
-            const p = document.getElementById("pass").value;
-            signInWithEmailAndPassword(auth, e, p)
+            signInWithEmailAndPassword(auth, document.getElementById("email").value, document.getElementById("pass").value)
                 .then(() => {
                     document.getElementById("login").style.display = "none";
                     document.getElementById("chat").style.display = "block";
+                    mesajlariGetir();
                 })
-                .catch(err => alert("Hata: " + err.message));
+                .catch(e => alert(e.message));
         };
+
+        window.mesajGonder = () => {
+            const metin = document.getElementById("msg").value;
+            addDoc(collection(db, "mesajlar"), { metin: metin, zaman: Date.now() });
+            document.getElementById("msg").value = "";
+        };
+
+        function mesajlariGetir() {
+            onSnapshot(query(collection(db, "mesajlar"), orderBy("zaman")), (snapshot) => {
+                const chatBox = document.getElementById("chatBox");
+                chatBox.innerHTML = "";
+                snapshot.forEach(doc => {
+                    chatBox.innerHTML += `<p>${doc.data().metin}</p>`;
+                });
+            });
+        }
     </script>
 </body>
 </html>
