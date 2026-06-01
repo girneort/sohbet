@@ -1,13 +1,18 @@
 <!DOCTYPE html>
-<html>
+<html lang="tr">
 <head>
+    <meta charset="UTF-8">
     <title>Sohbetim</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 50px; }
+        input { display: block; margin: 10px auto; padding: 10px; width: 250px; }
+    </style>
 </head>
 <body>
 
     <div id="login">
         <h2>Giriş Yap</h2>
-        <input id="email" placeholder="E-posta">
+        <input type="email" id="email" placeholder="E-posta">
         <input type="password" id="pass" placeholder="Şifre">
         <button onclick="kayitOl()">Kaydol</button>
         <button onclick="girisYap()">Giriş Yap</button>
@@ -15,14 +20,13 @@
 
     <div id="chat" style="display:none;">
         <h2>Sohbet Odası</h2>
-        <button onclick="location.reload()">Çıkış</button>
+        <button onclick="location.reload()">Çıkış Yap</button>
     </div>
 
     <script type="module">
         import { initializeApp } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-app.js";
         import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword } from "https://www.gstatic.com/firebasejs/9.22.0/firebase-auth.js";
 
-        // Kendi Firebase anahtarların
         const firebaseConfig = {
             apiKey: "AIzaSyAeIwGfi_IQuiqzFyv6FvmgmdRocEDT_BI",
             authDomain: "okul-sohbet-45e51.firebaseapp.com",
@@ -34,21 +38,23 @@
 
         const auth = getAuth(initializeApp(firebaseConfig));
 
-        // Kayıt Fonksiyonu
         window.kayitOl = () => {
-            createUserWithEmailAndPassword(auth, document.getElementById("email").value, document.getElementById("pass").value)
-                .then(() => alert("Kayıt tamam! Şimdi giriş yap."))
-                .catch(e => alert(e.message));
+            const e = document.getElementById("email").value;
+            const p = document.getElementById("pass").value;
+            createUserWithEmailAndPassword(auth, e, p)
+                .then(() => alert("Kayıt tamam! Şimdi giriş yapabilirsin."))
+                .catch(err => alert("Hata: " + err.message));
         };
 
-        // Giriş Fonksiyonu
         window.girisYap = () => {
-            signInWithEmailAndPassword(auth, document.getElementById("email").value, document.getElementById("pass").value)
+            const e = document.getElementById("email").value;
+            const p = document.getElementById("pass").value;
+            signInWithEmailAndPassword(auth, e, p)
                 .then(() => {
                     document.getElementById("login").style.display = "none";
                     document.getElementById("chat").style.display = "block";
                 })
-                .catch(e => alert("Hata: " + e.message));
+                .catch(err => alert("Hata: " + err.message));
         };
     </script>
 </body>
